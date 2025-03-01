@@ -1,11 +1,27 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+#include <windows.h>
 #include <stdio.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
 #define EDGE_MARGIN 5  // The detection range for resizing
+
+int fullscreen = 0;  // Track fullscreen state
+
+void ToggleFullscreen(SDL_Window* window) {
+    HWND taskbar = FindWindow("Shell_TrayWnd", NULL); // Get taskbar handle
+    fullscreen = !fullscreen;
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        ShowWindow(taskbar, SW_HIDE); // Hide taskbar
+    } else {
+        SDL_SetWindowFullscreen(window, 0);
+        ShowWindow(taskbar, SW_SHOW); // Show taskbar
+    }
+}
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -50,8 +66,14 @@ int main(int argc, char* argv[]) {
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
+                ShowWindow(FindWindow("Shell_TrayWnd", NULL), SW_SHOW);
                 running = 0;
             } 
+            else if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_F11) {
+                    ToggleFullscreen(window);
+                }
+            }
             else if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     width = event.window.data1;
@@ -99,6 +121,7 @@ int main(int argc, char* argv[]) {
                         bottom_panel_height = height - mouse_y;
                     }
                 }
+
             }
         }
 
@@ -112,6 +135,18 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
         SDL_RenderFillRect(renderer, &bottom_panel);
 
+        // Define the thickness of the line
+        int line_thickness = 3;
+
+        // First line (Original separator)
+        SDL_Rect top_line = {left_panel_width, height - bottom_panel_height, width - left_panel_width, line_thickness};
+        SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);  // Gray color
+        SDL_RenderFillRect(renderer, &top_line);
+
+        // Second line (Slightly below)
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // White color for contrast
+        SDL_RenderDrawLine(renderer, left_panel_width, height - bottom_panel_height + 27, width, height - bottom_panel_height + 27);
+
         // Draw left panel (light gray)
         SDL_Rect left_panel = {0, 0, left_panel_width, height};
         SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
@@ -121,6 +156,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Cleanup
+    ShowWindow(FindWindow("Shell_TrayWnd", NULL), SW_SHOW);
     SDL_FreeCursor(resize_cursor_hor);
     SDL_FreeCursor(resize_cursor_ver);
     SDL_FreeCursor(default_cursor);
