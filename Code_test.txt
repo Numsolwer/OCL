@@ -1,0 +1,72 @@
+﻿# OCL2DRI Feature Showcase
+let window = ocl.get_ocl2dra.init(400, 300, "OCL2DRI Features");
+ocl.get_ocl2dra.set_background(window, 0, 128, 255);  # Initial blue background
+ocl.get_ocl2dra.set_frame_rate(window, 60);  # 60 FPS
+ocl.get_ocl2dra.set_icon(window, "icon.bmp");  # Assumes icon.bmp exists
+
+let opacity = 1.0;  # Start fully opaque
+let fade_direction = 0 - 1;  # Fade out initially
+let is_resizable = 1;  # Window resizable by default
+let is_always_on_top = 0;  # Not always on top by default
+
+while ocl.get_ocl2dra.is_running(window): {
+    let dt = ocl.get_ocl2dra.get_delta_time(window);
+
+    # Fade opacity in and out
+    opacity = opacity + fade_direction * dt;
+    if opacity >= 1.0: {
+        opacity = 1.0;
+        fade_direction = 0 - 1;
+    }
+    if opacity <= 0.2: {
+        opacity = 0.2;
+        fade_direction = 1;
+    }
+    ocl.get_ocl2dra.set_opacity(window, opacity);
+
+    # Toggle resizable with 'R' key
+    let r_key = ocl.get_ocl2dra.get_key_state(window, "r");
+    if r_key > 0: {
+        if is_resizable == 1: {
+            is_resizable = 0;
+        } else: {
+            is_resizable = 1;
+        }
+        ocl.get_ocl2dra.set_resizable(window, is_resizable);
+    }
+
+    # Toggle always-on-top with 'T' key
+    let t_key = ocl.get_ocl2dra.get_key_state(window, "t");
+    if t_key > 0: {
+        if is_always_on_top == 1: {
+            is_always_on_top = 0;
+        } else: {
+            is_always_on_top = 1;
+        }
+        ocl.get_ocl2dra.set_always_on_top(window, is_always_on_top);
+    }
+
+    # Resize window with left mouse click
+    let left_click = ocl.get_ocl2dra.get_mouse_button_state(window, 1);
+    if left_click > 0: {
+        ocl.get_ocl2dra.set_size(window, 600, 400);
+    }
+
+    # Move window with right mouse click
+    let right_click = ocl.get_ocl2dra.get_mouse_button_state(window, 3);
+    if right_click > 0: {
+        let mouse_pos = ocl.get_ocl2dra.get_mouse_position(window);
+        let mouse_x = mouse_pos[0];
+        let mouse_y = mouse_pos[1];
+        ocl.get_ocl2dra.set_position(window, mouse_x, mouse_y);
+    }
+
+    # Update title with status
+    let title = "Opacity: {opacity} Resizable: {is_resizable} Top: {is_always_on_top}";
+    ocl.get_ocl2dra.set_title(window, title);
+
+    ocl.get_ocl2dra.update(window);
+}
+
+ocl.get_ocl2dra.destroy(window);
+print "Feature showcase ended.";
