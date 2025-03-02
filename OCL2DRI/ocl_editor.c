@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
     int width = WINDOW_WIDTH, height = WINDOW_HEIGHT;
     int left_panel_width = 200;
     int bottom_panel_height = 150;
+    int top_panel_height = 50;  // Fixed top panel height
     int dragging_left = 0;
     int dragging_bottom = 0;
 
@@ -117,40 +118,48 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (dragging_bottom) {
-                    if (mouse_y < height - 50 && mouse_y > 50) {
+                    if (mouse_y < height - 50 && mouse_y > top_panel_height + 50) {
                         bottom_panel_height = height - mouse_y;
                     }
                 }
-
             }
         }
 
-        // Set background color (navy blue), adjusting size
+        // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 32, 42, 255);
-        SDL_Rect background = {left_panel_width, 0, width - left_panel_width, height - bottom_panel_height};
+        SDL_RenderClear(renderer);
+
+        // Draw main background
+        SDL_Rect background = {left_panel_width, top_panel_height, width - left_panel_width, height - bottom_panel_height - top_panel_height};
+        SDL_SetRenderDrawColor(renderer, 0, 32, 42, 255);
         SDL_RenderFillRect(renderer, &background);
 
         // Draw bottom panel (dark gray)
         SDL_Rect bottom_panel = {left_panel_width, height - bottom_panel_height, width - left_panel_width, bottom_panel_height};
-        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderFillRect(renderer, &bottom_panel);
-
-        // Define the thickness of the line
-        int line_thickness = 3;
-
-        // First line (Original separator)
-        SDL_Rect top_line = {left_panel_width, height - bottom_panel_height, width - left_panel_width, line_thickness};
-        SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);  // Gray color
-        SDL_RenderFillRect(renderer, &top_line);
-
-        // Second line (Slightly below)
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // White color for contrast
-        SDL_RenderDrawLine(renderer, left_panel_width, height - bottom_panel_height + 27, width, height - bottom_panel_height + 27);
 
         // Draw left panel (light gray)
         SDL_Rect left_panel = {0, 0, left_panel_width, height};
-        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_SetRenderDrawColor(renderer,  0, 32, 52, 255);
         SDL_RenderFillRect(renderer, &left_panel);
+
+        // Draw top panel (dark gray)
+        SDL_Rect top_panel = {0, 0, width, top_panel_height - 23};
+        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+        SDL_RenderFillRect(renderer, &top_panel);
+
+        // Draw separator lines
+        int line_thickness = 5;
+
+        // Bottom panel separator (Original separator)
+        SDL_Rect bottom_line = {left_panel_width, height - bottom_panel_height, width - left_panel_width, line_thickness};
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // White color
+        SDL_RenderFillRect(renderer, &bottom_line);
+
+        // Top panel separator (white line at the bottom of the top panel)
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawLine(renderer, 0, top_panel_height - 23, width, top_panel_height -23);
 
         SDL_RenderPresent(renderer);
     }
